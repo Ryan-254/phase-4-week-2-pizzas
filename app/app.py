@@ -44,12 +44,24 @@ class RestaurantById(Resource):
             return response
         
     def delete(self, id):
-        restaurant2 = Restaurant.query.filter_by(id=id).first()
-        if restaurant2 is None:
-            response= make_response(jsonify({'error':'Restaurant not found'}),404)
+        restaurant = Restaurant.query.filter_by(id=id).first()
+        
+        if restaurant:
+            RestaurantPizza.query.filter_by(restaurant_id=id).delete()
+            db.session.commit()
+            
+            # Delete Restaurant
+            db.session.delete(restaurant)
+            db.session.commit()
+
+            response = make_response("", 204)
+
+        else:
+            response = make_response(
+                jsonify({"error": "Restaurant not found"}),
+                404
+                )
             return response
-        db.session.delete(restaurant2)
-        db.session.commit()
 
     
 
